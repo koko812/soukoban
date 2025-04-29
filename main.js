@@ -49,12 +49,14 @@ const init = () => {
             }
 
             if (data & 8) {
-                const lugguage = document.createElement('div')
-                lugguage.className = 'hero'
-                lugguage.textContent = '🐥' 
-                lugguage.style.top = `calc(var(--size) * ${i})`
-                lugguage.style.left = `calc(var(--size) * ${j})`
+                const hero = document.createElement('div')
+                hero.className = 'hero'
+                hero.textContent = '🐥' 
+                hero.style.top = `calc(var(--size) * ${i})`
+                hero.style.left = `calc(var(--size) * ${j})`
                 container.appendChild(lugguage)
+                heroX = j
+                heroY = i
             }
         }
     }
