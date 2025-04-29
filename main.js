@@ -8,14 +8,17 @@ const map = [
     [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
     [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
     [1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0],
-    [1, 0, 0, 0, 0, 8, 0, 0, 0, 0, 1, 0],
-    [1, 0, 0, 4, 0, 4, 0, 4, 0, 0, 1, 0],
-    [1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0],
+    [1, 0, 0, 0, 0, 8, 1, 0, 0, 1, 1, 0],
+    [1, 0, 1, 4, 0, 4, 0, 4, 0, 1, 1, 0],
+    [1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0],
     [1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0],
     [0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0],
     [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
     [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
 ]
+
+let heroElement = null
+let heroX, heroY;
 
 const init = () => {
     document.body.style.setProperty('--size', `${size}px`)
@@ -31,12 +34,28 @@ const init = () => {
             panel.className = 'panel'
             panel.style.top = `calc(var(--size) * ${i})`
             panel.style.left = `calc(var(--size) * ${j})`
-            panel.style.width = `calc(var(--size))`
-            panel.style.height = `calc(var(--size))`
-            panel.style.backgroundColor = (map[i][j] & 1) ? '#f80' : (map[i][j] & 2) ? '#cc0': '#000'
-            panel.textContent = (map[i][j] & 4) ? '📦' : (map[i][j] & 8) ? '🐥' : ''
-            panel.style.fontSize = `calc(var(--size)*${0.8})`
+            // 何回も書くのがめんどくさそうなものは，変数化しておこう
+            data = map[i][j]
+            panel.style.backgroundColor = (data & 1) ? '#f80' : (data & 2) ? '#cc0' : '#000'
             container.appendChild(panel)
+
+            if (data & 4) {
+                const lugguage = document.createElement('div')
+                lugguage.className = 'lugguage'
+                lugguage.textContent = '📦' 
+                lugguage.style.top = `calc(var(--size) * ${i})`
+                lugguage.style.left = `calc(var(--size) * ${j})`
+                container.appendChild(lugguage)
+            }
+
+            if (data & 8) {
+                const lugguage = document.createElement('div')
+                lugguage.className = 'hero'
+                lugguage.textContent = '🐥' 
+                lugguage.style.top = `calc(var(--size) * ${i})`
+                lugguage.style.left = `calc(var(--size) * ${j})`
+                container.appendChild(lugguage)
+            }
         }
     }
 }

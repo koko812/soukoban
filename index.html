@@ -11,7 +11,21 @@
         } 
         .panel{
             position: absolute;
+            height: var(--size);
+            width: var(--size);
         }
+        /*この書き方，２コンポーネント同時定義はテクい（css のコメントアウトも覚えとこう）*/
+        .lugguage, .hero{
+            position: absolute;
+            font-size: calc(var(--size)*0.95);
+            height: var(--size);
+            width: var(--size);
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
     </style>
     <script src="main.js"></script>
 </head>
