@@ -85,11 +85,73 @@ const move = (dx, dy) => {
     }
 }
 
-const push = (x,y) => {
-    if(canEnter(x,y)){
-        move(x,y)
+let lugguageList = []
+const push = (x, y) => {
+    // なぜか壁に反応している？
+    console.log('push!a');
+    if (moveDirectionList.length) {
+        // 動いてる途中の時は無視
+        console.log('mdl_filled');
+        return
+    }
+    if (canEnter(x, y)) {
+        console.log('enter');
+        // この return はなくても動く？
+        // まあでも，ここで関数を止める必要があるのか？いやいらなくね？
+        // いや，lugguage がない場合の処理なので必要だなこれ
+        return move(x, y)
+    }
+    console.log('push!');
+    for (const lugguage of lugguageList) {
+        const lx = lugguage.x
+        const ly = lugguage.y
+        console.log('l', lx, ly, x, y);
+        // こいつは変更するつもりなんだが，const でいいのか？
+        // どうやらいいっぽい？？まあ中身の style をいじるだけなので気にしなくていいんだろう
+        const element = lugguage.element
+        // もし動こうとする位置が lugguage と同じならば，lugguage ごと動かしたい
+        // lugguage のスペルミスが判明，luggage でした
+        if (lx === x && ly === y) {
+            // 動かす先の位置を定める
+            dx = lx - heroX
+            dy = ly - heroY
+            tx = lx + dx
+            ty = ly + dy
+
+
+            // 動かす先が空いてるかを確認
+            if (canEnter(tx, ty)) {
+                // 荷物を今の位置から消す
+                // 荷物を目的に動かす
+                // 荷物のリストを更新する
+                // ひよこを動かす
+                map[ty][tx] |= 4
+                // この xor 演算マジで天才すぎるでしょ
+                map[ly][lx] ^= 4
+
+                console.log('push!');
+
+                element.style.top = `calc(var(--size) * ${ty})`
+                element.style.left = `calc(var(--size) * ${tx})`
+
+                // lagguageList の更新ってどうやるんだ・・・？
+                // 別に更新しなくていいっぽい，普通に directionList をこうしんしたらいいだけっぽい
+                // 嘘でしたここで更新してました
+                lugguage.x = tx
+                lugguage.y = ty
+
+                // それ (pushDirectionList) を更新したらなんかいい感じに動くというのは，これ結構謎なんだけど
+                // まあ move のところで一緒に処理されるというのはなんとなくわかるんだけど
+                // じゃあ ^ はなんで move を使ってるのかという話が存在するような気がする
+
+                // ここの push はあくまで direction なので，dx と dy を追加するだけ
+                moveDirectionList.push([dx, dy])
+                return
+            }
+        }
     }
 }
+
 const init = () => {
     document.body.style.setProperty('--size', `${size}px`)
     const container = document.createElement('div')
@@ -115,6 +177,9 @@ const init = () => {
                 lugguage.textContent = '📦'
                 lugguage.style.top = `calc(var(--size) * ${i})`
                 lugguage.style.left = `calc(var(--size) * ${j})`
+                // 辞書に push する時は，キーの値を省略すると，変数名：値の形で格納されるっぽい
+                // 前の何かで出てきた（tetoris or ブロック崩し）の疑問の解決
+                lugguageList.push({ x: j, y: i, element: lugguage })
                 container.appendChild(lugguage)
             }
 
@@ -172,7 +237,7 @@ const init = () => {
             // 押されてる時，さらにpointer が動いた時のみ発動して，position をとってくる
             // これだと，ひよこをドラッグしなくても，隣接マスをテキトーにドラッグしても良さげ？？
             if (Math.abs(x - heroX) + Math.abs(y - heroY) === 1) {
-                push(x,y)
+                push(x, y)
             }
         }
     }
