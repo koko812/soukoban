@@ -88,9 +88,10 @@ const move = (dx, dy) => {
 let lugguageList = []
 const push = (x, y) => {
     // なぜか壁に反応している？
-    console.log('push!a');
+    // 壁には反応するが，荷物に反応しない
+    console.log(canEnter(x, y));
     if (moveDirectionList.length) {
-        // 動いてる途中の時は無視
+        // 動いてる途中の時は無視 
         console.log('mdl_filled');
         return
     }
@@ -105,14 +106,15 @@ const push = (x, y) => {
     for (const lugguage of lugguageList) {
         const lx = lugguage.x
         const ly = lugguage.y
-        console.log('l', lx, ly, x, y);
-        // こいつは変更するつもりなんだが，const でいいのか？
+        console.log('l', lx, ly, x, y)
+        // こいつは変更するつもりなんだが，cons, x, yか？
         // どうやらいいっぽい？？まあ中身の style をいじるだけなので気にしなくていいんだろう
         const element = lugguage.element
+        console.log(element);
         // もし動こうとする位置が lugguage と同じならば，lugguage ごと動かしたい
         // lugguage のスペルミスが判明，luggage でした
         if (lx === x && ly === y) {
-            // 動かす先の位置を定める
+            // 動かす の位置を定める   
             dx = lx - heroX
             dy = ly - heroY
             tx = lx + dx
@@ -121,7 +123,7 @@ const push = (x, y) => {
 
             // 動かす先が空いてるかを確認
             if (canEnter(tx, ty)) {
-                // 荷物を今の位置から消す
+                // 荷物を今の位置から す 
                 // 荷物を目的に動かす
                 // 荷物のリストを更新する
                 // ひよこを動かす
@@ -227,15 +229,17 @@ const init = () => {
         isDown = false
     }
 
-    container.onpointermove = (e) => {
+    document.onpointermove = (e) => {
         // こいつ忘れてた（が必要なのかはわからん）
         e.preventDefault()
         if (isDown) {
-            const x = Math.trunc(e.offsetX / size)
-            const y = Math.trunc(e.offsetY / size)
+            const x = Math.trunc(e.pageX / size)
+            const y = Math.trunc(e.pageY / size)
             // 本当にこれでドラッグを検知できるのか？という感じあり
             // 押されてる時，さらにpointer が動いた時のみ発動して，position をとってくる
             // これだと，ひよこをドラッグしなくても，隣接マスをテキトーにドラッグしても良さげ？？
+            console.log('move!');
+            console.log(heroX, heroY, x, y ,Math.abs(x - heroX) + Math.abs(y - heroY));
             if (Math.abs(x - heroX) + Math.abs(y - heroY) === 1) {
                 push(x, y)
             }

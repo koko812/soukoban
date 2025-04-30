@@ -14,7 +14,7 @@
             height: var(--size);
             width: var(--size);
             pointer-events: none;
-            /*こいつをつけておかないと，クリックが全て，0,0 が帰ってくる*/
+            /*こいつjをつけておかないと，クリックが全て，0,0 が帰ってくる*/
         
         }
         /*この書き方，２コンポーネント同時定義はテクい（css のコメントアウトも覚えとこう）*/
@@ -27,6 +27,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        body{
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-drag: none;
         }
 
     </style>
