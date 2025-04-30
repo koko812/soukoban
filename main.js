@@ -154,9 +154,10 @@ const push = (x, y) => {
     }
 }
 
+let container = null
 const init = () => {
     document.body.style.setProperty('--size', `${size}px`)
-    const container = document.createElement('div')
+    container = document.createElement('div')
     container.className = 'container'
     container.style.width = `calc(var(--size) * ${width})`
     container.style.height = `calc(var(--size) * ${height})`
@@ -170,7 +171,7 @@ const init = () => {
             panel.style.left = `calc(var(--size) * ${j})`
             // 何回も書くのがめんどくさそうなものは，変数化しておこう
             data = map[i][j]
-            panel.style.backgroundColor = (data & 1) ? '#f80' : (data & 2) ? '#cc0' : '#000'
+            panel.style.backgroundColor = (data & 1) ? '#f80' : (data & 2) ? '#cc0' : container.backgroundColor
             container.appendChild(panel)
 
             if (data & 4) {
@@ -239,7 +240,7 @@ const init = () => {
             // 押されてる時，さらにpointer が動いた時のみ発動して，position をとってくる
             // これだと，ひよこをドラッグしなくても，隣接マスをテキトーにドラッグしても良さげ？？
             console.log('move!');
-            console.log(heroX, heroY, x, y ,Math.abs(x - heroX) + Math.abs(y - heroY));
+            console.log(heroX, heroY, x, y, Math.abs(x - heroX) + Math.abs(y - heroY));
             if (Math.abs(x - heroX) + Math.abs(y - heroY) === 1) {
                 push(x, y)
             }
@@ -252,7 +253,7 @@ const init = () => {
 window.onload = () => {
     init()
     console.log(heroElement);
-    const tick = () => {
+    const tick = async () => {
         if (moveDirectionList.length) {
             console.log('moving');
             const [dx, dy] = moveDirectionList.shift()
@@ -260,8 +261,25 @@ window.onload = () => {
             heroY += dy
             heroElement.style.left = `calc(var(--size)*${heroX})`
             heroElement.style.top = `calc(var(--size)*${heroY})`
+            // いいね，animation つけたら，もたつくけど，だいぶゲーム感でるね
+            await new Promise(r => setTimeout(r, 50))
+
+            let isClear = true
+            for (const lugguage of lugguageList) {
+                // ここの bit 判定法マジで天才すぎる，ゲームプログラマーって感じ
+                if (!(map[lugguage.y][lugguage.x] & 2)) {
+                    isClear = false
+                }
+                console.log('isClear', isClear);
+            }
+            if (isClear) {
+                container.style.backgroundColor = '#0cf'
+            } else {
+                requestAnimationFrame(tick)
+            }
+        } else {
+            requestAnimationFrame(tick)
         }
-        requestAnimationFrame(tick)
     }
     tick()
 }

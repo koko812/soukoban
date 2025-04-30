@@ -14,7 +14,7 @@
             height: var(--size);
             width: var(--size);
             pointer-events: none;
-            /*こいつjをつけておかないと，クリックが全て，0,0 が帰ってくる*/
+            /*こいつをつけておかないと，クリックが全て，0,0 が帰ってくる*/
         
         }
         /*この書き方，２コンポーネント同時定義はテクい（css のコメントアウトも覚えとこう）*/
@@ -27,6 +27,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            /* （ここにも pointer-events: none をつければ，offset でも動く説？？）*/
+            transition: all 50ms linear;
         }
 
         body{
