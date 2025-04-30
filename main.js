@@ -20,6 +20,76 @@ const map = [
 let heroElement = null
 let heroX, heroY;
 
+const canEnter = (x, y) => {
+    if (map[y][x] & 1 || map[y][x] & 4) {
+        return false
+    }
+    return true
+}
+
+const moveDirectionList = []
+// これの位置を init の後にするか手前にするか問題があるんだが
+// t-kihira はどのプログラムでも一貫して，init は onload の手前においてる
+// で，最初は init の後に僕は置いてたんだが，やっぱり，onload と init は
+// 近い方がいじりやすい感じがしたので，配置転換した
+// onload で init の変数を使うことが多い（onpointerdown) ので，
+// そっちの方が都合がいいような気がしてきた
+const move = (dx, dy) => {
+    // まず何の処理を書くべきか
+    // 核心部なので頑張ろう
+    // 基本的に通った位置と進んだ方向みたいなのが帰ってこればおk？
+    // 紀平氏のプログラムが最適なのかは判断が必要だが
+
+    if (moveDirectionList.length) {
+        return
+    }
+
+    // まず，押された場所が壁と荷物じゃないことを確認する
+    // そのマップを作る（押された，というより指定された，だな）
+    const emptyMap = []
+    for (let y = 0; y < height; y++) {
+        emptyMap[y] = []
+        for (let x = 0; x < width; x++) {
+            emptyMap[y][x] = canEnter(x, y)
+        }
+    }
+
+    // 幅優先の初期条件
+    // 今いる場所と，進む方向のリストが必要
+    // 幅優先は queue を使うという強い思想が必要
+    // 幅優先はまず頭を取り出す，その後・・・というところを頭に入れておけ
+    // 深さ優先は stack だな
+    const positionQueue = [[heroX, heroY, []]]
+    // ここ 二重の配列にしておく必要あり
+    // dx と dy を入れるんじゃなくて，heroX と heroY をいれろ（初期条件なのであたりまえ）
+    while (positionQueue.length) {
+        console.log('positions');
+        // 最初から分けて取り出した方が楽
+        const [tx, ty, pathlist] = positionQueue.shift()
+        // canenter で判定しても意味ない
+        // emptyMap を作ったのは，一度訪れた場所を記録するため
+        if (!emptyMap[ty][tx]) {
+            continue
+        }
+
+        // これを入れないと，一度行った場所を何度も探索して無限ループする
+        emptyMap[ty][tx] = false
+        if (tx === dx && ty === dy) {
+            moveDirectionList.push(...pathlist)
+            return
+        }
+        positionQueue.push([tx + 1, ty, [...pathlist, [1, 0]]])
+        positionQueue.push([tx - 1, ty, [...pathlist, [-1, 0]]])
+        positionQueue.push([tx, ty + 1, [...pathlist, [0, 1]]])
+        positionQueue.push([tx, ty - 1, [...pathlist, [0, -1]]])
+    }
+}
+
+const push = (x,y) => {
+    if(canEnter(x,y)){
+        move(x,y)
+    }
+}
 const init = () => {
     document.body.style.setProperty('--size', `${size}px`)
     const container = document.createElement('div')
@@ -66,7 +136,10 @@ const init = () => {
         e.preventDefault()
     }
 
-    document.onpointerdown = (e) => {
+    let isDown = false
+    // container の n がやたらと抜けがち
+    // これを container にするか，document にするかで何か違いはあるんだろうか
+    container.onpointerdown = (e) => {
         e.preventDefault()
         // ここの書くことが意外にわからん
         // タイルを指すのか，座標を返すのか，一体どれなんだ
@@ -81,66 +154,30 @@ const init = () => {
         // css の pointer-event はマジで殺しておく必要がある
         // これで，タイルごとのタップ判定を撮ってこれるってわけ，さすがすぎ
         move(x, y)
-    }
-}
 
-const canEnter = (x, y) => {
-    if (map[y][x] & 1 || map[y][x] & 4) {
-        return false
-    }
-    return true
-}
-
-const moveDirectionList = []
-const move = (dx, dy) => {
-    // まず何の処理を書くべきか
-    // 核心部なので頑張ろう
-    // 基本的に通った位置と進んだ方向みたいなのが帰ってこればおk？
-    // 紀平氏のプログラムが最適なのかは判断が必要だが
-
-    if (moveDirectionList.length) {
-        return
+        isDown = true
     }
 
-    // まず，押された場所が壁と荷物じゃないことを確認する
-    // そのマップを作る（押された，というより指定された，だな）
-    const emptyMap = []
-    for (let y = 0; y < height; y++) {
-        emptyMap[y] = []
-        for (let x = 0; x < width; x++) {
-            emptyMap[y][x] = canEnter(x, y)
+    document.onpointerup = (e) => {
+        isDown = false
+    }
+
+    container.onpointermove = (e) => {
+        // こいつ忘れてた（が必要なのかはわからん）
+        e.preventDefault()
+        if (isDown) {
+            const x = Math.trunc(e.offsetX / size)
+            const y = Math.trunc(e.offsetY / size)
+            // 本当にこれでドラッグを検知できるのか？という感じあり
+            // 押されてる時，さらにpointer が動いた時のみ発動して，position をとってくる
+            // これだと，ひよこをドラッグしなくても，隣接マスをテキトーにドラッグしても良さげ？？
+            if (Math.abs(x - heroX) + Math.abs(y - heroY) === 1) {
+                push(x,y)
+            }
         }
     }
 
-    // 幅優先の初期条件
-    // 今いる場所と，進む方向のリストが必要
-    // 幅優先は queue を使うという強い思想が必要
-    // 幅優先はまず頭を取り出す，その後・・・というところを頭に入れておけ
-    // 深さ優先は stack だな
-    const positionQueue = [[heroX, heroY, []]]
-    // ここ 二重の配列にしておく必要あり
-    // dx と dy を入れるんじゃなくて，heroX と heroY をいれろ（初期条件なのであたりまえ）
-    while (positionQueue.length) {
-        console.log('positions');
-        // 最初から分けて取り出した方が楽
-        const [tx, ty, pathlist] = positionQueue.shift()
-        // canenter で判定しても意味ない
-        // emptyMap を作ったのは，一度訪れた場所を記録するため
-        if (!emptyMap[ty][tx]) {
-            continue 
-        }
-
-        // これを入れないと，一度行った場所を何度も探索して無限ループする
-        emptyMap[ty][tx]=false
-        if (tx === dx && ty === dy) {
-            moveDirectionList.push(...pathlist)
-            return
-        }
-        positionQueue.push([tx + 1, ty, [...pathlist, [1, 0]]])
-        positionQueue.push([tx - 1, ty, [...pathlist, [-1, 0]]])
-        positionQueue.push([tx, ty + 1, [...pathlist, [0, 1]]])
-        positionQueue.push([tx, ty - 1, [...pathlist, [0, -1]]])
-    }
+    //箱を押す動作を定義していく
 }
 
 window.onload = () => {
